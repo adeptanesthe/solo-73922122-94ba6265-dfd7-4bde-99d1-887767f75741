@@ -1,0 +1,23 @@
+services:
+  voxel-pool-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: voxel-maxpool-occlusion-api:1.0.0
+    container_name: voxel-pool-api
+    ports:
+      # Override the host side with APP_PORT if 8000 is taken.
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).status == 200 else 1)"
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 10
+    restart: unless-stopped
